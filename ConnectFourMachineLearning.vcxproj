@@ -147,6 +147,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="AI.cpp" />
     <ClCompile Include="ConnectFourMachineLearning.cpp" />
     <ClCompile Include="Grid.cpp" />
     <ClCompile Include="pch.cpp">
@@ -157,7 +158,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AI.h" />
     <ClInclude Include="Grid.h" />
+    <ClInclude Include="FMatrix.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
