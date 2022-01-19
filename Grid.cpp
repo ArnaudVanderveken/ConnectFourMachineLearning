@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "Grid.h"
 
+
 Grid::Grid()
 {
 	m_Grid = new char* [6];
