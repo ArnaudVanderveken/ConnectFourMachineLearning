@@ -24,12 +24,13 @@ public:
 
 	void ResetGrid();
 	void InsertToken(char token, int column);
+	int GetAvailableRowInColumn(int column) const;
 	bool IsColumnFull(int column) const;
 
 	char** GetGrid() const;
 	void Print() const;
 
-	const Eigen::Matrix<float, 1, 81>& GetStateMatrix() const;
+	const Eigen::Matrix<float, 1, 84>& GetStateMatrix() const;
 
 	WinState CheckWinCondition() const;
 

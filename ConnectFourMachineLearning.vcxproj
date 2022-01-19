@@ -162,7 +162,6 @@
   <ItemGroup>
     <ClInclude Include="AI.h" />
     <ClInclude Include="Grid.h" />
-    <ClInclude Include="FMatrix.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

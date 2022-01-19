@@ -35,7 +35,7 @@ void Grid::InsertToken(char token, int column)
 	int i{};
 	do 
 	{
-		if (m_Grid[i][column] != ' ')
+		if (m_Grid[i][column] != EMPTY_TOKEN)
 		{
 			m_Grid[i - 1][column] = token;
 
@@ -54,9 +54,23 @@ void Grid::InsertToken(char token, int column)
 	} while (i < Grid::s_NrRows);
 }
 
+int Grid::GetAvailableRowInColumn(int column) const
+{
+	int i{};
+	do
+	{
+		if (m_Grid[i][column] != EMPTY_TOKEN)
+		{
+			return i;
+		}
+		++i;
+	} while (i < Grid::s_NrRows);
+	return -1;
+}
+
 bool Grid::IsColumnFull(int column) const
 {
-	return m_Grid[0][column] != ' ';
+	return m_Grid[0][column] != EMPTY_TOKEN;
 }
 
 char** Grid::GetGrid() const
@@ -78,7 +92,7 @@ void Grid::Print() const
 	std::cout << std::endl;
 }
 
-const Eigen::Matrix<float, 1, 81>& Grid::GetStateMatrix() const
+const Eigen::Matrix<float, 1, 84>& Grid::GetStateMatrix() const
 {
 	return m_StateMatrix;
 }

@@ -3,8 +3,8 @@
 
 AI::AI()
 {
-	Eigen::Rand::Vmt19937_64 generator;
-
-	m_Win = Eigen::Rand::normal<Eigen::Matrix<float, 84, s_InnerLayerNeuronCount>>(84, s_InnerLayerNeuronCount, generator, 0.0f, 0.01f);
-	m_Wout = Eigen::Rand::normal<Eigen::Matrix<float, s_InnerLayerNeuronCount, 1>>(s_InnerLayerNeuronCount, 1, generator, 0.0f, 0.01f);
+	// Initializing weights based on a normal distribution (mean 0.0, stdev 0.0001)
+	Eigen::Rand::P8_mt19937_64 urng{ 42 };
+	m_Win = Eigen::Rand::normal<Eigen::Matrix<float, 84, s_InnerLayerNeuronCount>>(84, s_InnerLayerNeuronCount, urng, 0.0f, 0.0001f);
+	m_Wout = Eigen::Rand::normal<Eigen::Matrix<float, s_InnerLayerNeuronCount, 1>>(s_InnerLayerNeuronCount, 1, urng, 0.0f, 0.0001f);
 }
