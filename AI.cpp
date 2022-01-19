@@ -3,19 +3,15 @@
 
 using Eigen::Rand::normal, Eigen::Matrix;
 
-AI::AI()
-{
-	// Initializing weights based on a normal distribution (mean 0.0, stdev 0.0001)
-	Eigen::Rand::P8_mt19937_64 urng{ 42 };
-	m_Win = normal<Matrix<float, 84, s_InnerLayerNeuronCount>>(84, s_InnerLayerNeuronCount, urng, 0.0f, 0.0001f);
-	m_Wout = normal<Matrix<float, s_InnerLayerNeuronCount, 1>>(s_InnerLayerNeuronCount, 1, urng, 0.0f, 0.0001f);
-}
-
 AI::AI(float epsilon, float learningRate, float lambda)
 	: m_Epsilon{ epsilon }
 	, m_LearningRate{ learningRate }
 	, m_Lambda{ lambda }
 {
+	// Initializing weights based on a normal distribution (mean 0.0, stdev 0.0001)
+	Eigen::Rand::P8_mt19937_64 urng{ 42 };
+	m_Win = normal<Matrix<float, 84, s_InnerLayerNeuronCount>>(84, s_InnerLayerNeuronCount, urng, 0.0f, 0.0001f);
+	m_Wout = normal<Matrix<float, s_InnerLayerNeuronCount, 1>>(s_InnerLayerNeuronCount, 1, urng, 0.0f, 0.0001f);
 }
 
 float AI::NNForwardPass(Eigen::Matrix<float, 1, 84> input) const
