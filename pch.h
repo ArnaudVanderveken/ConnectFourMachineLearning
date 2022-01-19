@@ -10,5 +10,6 @@
 // add headers that you want to pre-compile here
 #include <iostream>
 #include <Eigen/Core>
+#include <EigenRand/EigenRand>
 
 #endif //PCH_H

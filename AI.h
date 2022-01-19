@@ -4,7 +4,7 @@
 class AI final
 {
 public:
-	AI() = default;
+	AI();
 	~AI() = default;
 	AI(const AI&) = delete;
 	AI& operator=(const AI&) = delete;
