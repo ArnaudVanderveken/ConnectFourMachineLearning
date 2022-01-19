@@ -38,6 +38,16 @@ void Grid::InsertToken(char token, int column)
 		if (m_Grid[i][column] != ' ')
 		{
 			m_Grid[i - 1][column] = token;
+
+			if (token == P1_TOKEN)
+			{
+				m_StateMatrix[0, i * 7 + column] = 1.0f;
+			}
+			else
+			{
+				m_StateMatrix[0, i * 7 + column + 42] = 1.0f;
+			}
+
 			return;
 		}
 		++i;
@@ -66,6 +76,11 @@ void Grid::Print() const
 		std::cout << "|\n";
 	}
 	std::cout << std::endl;
+}
+
+const Eigen::Matrix<float, 1, 81>& Grid::GetStateMatrix() const
+{
+	return m_StateMatrix;
 }
 
 Grid::WinState Grid::CheckWinCondition() const
