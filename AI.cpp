@@ -11,6 +11,13 @@ AI::AI()
 	m_Wout = normal<Matrix<float, s_InnerLayerNeuronCount, 1>>(s_InnerLayerNeuronCount, 1, urng, 0.0f, 0.0001f);
 }
 
+AI::AI(float epsilon, float learningRate, float lambda)
+	: m_Epsilon{ epsilon }
+	, m_LearningRate{ learningRate }
+	, m_Lambda{ lambda }
+{
+}
+
 float AI::NNForwardPass(Eigen::Matrix<float, 1, 84> input) const
 {
 	Matrix<float, 1, s_InnerLayerNeuronCount> intermediate = input * m_Win;
@@ -20,6 +27,14 @@ float AI::NNForwardPass(Eigen::Matrix<float, 1, 84> input) const
 	}
 	float out = intermediate * m_Wout;
 	return Sigmoid(out);
+}
+
+void AI::NNQLearning(Eigen::Matrix<float, 1, 84> oldState, Eigen::Matrix<float, 1, 84> bestState)
+{
+}
+
+void AI::NNTDLambda(Eigen::Matrix<float, 1, 84> oldState, Eigen::Matrix<float, 1, 84> playedState)
+{
 }
 
 float AI::Sigmoid(float x) const
