@@ -29,6 +29,7 @@ void Grid::ResetGrid()
 			m_Grid[i][j] = EMPTY_TOKEN;
 		}
 	}
+	m_StateMatrix.fill(0.0f);
 }
 
 void Grid::InsertToken(char token, int column)
@@ -42,11 +43,11 @@ void Grid::InsertToken(char token, int column)
 
 			if (token == P1_TOKEN)
 			{
-				m_StateMatrix[0, i * 7 + column] = 1.0f;
+				m_StateMatrix(0, i * 7 + column) = 1.0f;
 			}
 			else
 			{
-				m_StateMatrix[0, i * 7 + column + 42] = 1.0f;
+				m_StateMatrix(0, i * 7 + column + 42) = 1.0f;
 			}
 
 			return;

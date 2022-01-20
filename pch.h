@@ -8,8 +8,17 @@
 #define PCH_H
 
 // add headers that you want to pre-compile here
+
+
 #include <iostream>
 #include <Eigen/Core>
+
+#pragma warning (push)
+#pragma warning (disable : 4305) // disable warning caused by the EigenRand lib
 #include <EigenRand/EigenRand>
+#pragma warning (pop)
+
+#include <vector>
+#include <cassert>
 
 #endif //PCH_H
