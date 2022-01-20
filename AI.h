@@ -12,7 +12,7 @@ public:
 	AI(AI&&) noexcept = delete;
 	AI& operator=(AI&&) noexcept = delete;
 
-	int PlayMove(Grid* pGrid, bool asPlayer1);
+	int PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode);
 
 private:
 	static const int s_InnerLayerNeuronCount{ 84 };

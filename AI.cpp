@@ -15,12 +15,15 @@ AI::AI(float epsilon, float learningRate, float lambda)
 	m_Wout = normal<Matrix<float, s_InnerLayerNeuronCount, 1>>(s_InnerLayerNeuronCount, 1, urng, 0.0f, 0.0001f);
 }
 
-int AI::PlayMove(Grid* pGrid, bool asPlayer1)
+int AI::PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode)
 {
-	//E-Greedy test. If value is below epsilon, play random move.
-	float greedyTest{ rand() / float(RAND_MAX) }; //float btwn 0.0f - 1.0f
-	if (greedyTest < m_Epsilon)
-		return (rand() % 7); //int btwn 0 - 6
+	if (trainingMode) //Only do E-Greedy test in trainingMode. For an actual game, always play best move.
+	{
+		//E-Greedy test. If value is below epsilon, play random move.
+		float greedyTest{ rand() / float(RAND_MAX) }; //float btwn 0.0f - 1.0f
+		if (greedyTest < m_Epsilon)
+			return (rand() % 7); //int btwn 0 - 6
+	}
 
 	//Play the best move acording to the NN
 	vector<float> probabilities;
