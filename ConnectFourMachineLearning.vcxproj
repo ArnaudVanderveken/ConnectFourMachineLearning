@@ -161,6 +161,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AI.h" />
+    <ClInclude Include="Enums.h" />
     <ClInclude Include="Grid.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>

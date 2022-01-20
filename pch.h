@@ -8,9 +8,6 @@
 #define PCH_H
 
 // add headers that you want to pre-compile here
-
-
-#include <iostream>
 #include <Eigen/Core>
 
 #pragma warning (push)
@@ -18,7 +15,16 @@
 #include <EigenRand/EigenRand>
 #pragma warning (pop)
 
+#include <iostream>
 #include <vector>
 #include <cassert>
+#include <memory>
+#include <string>
+
+#include "Enums.h"
+
+#define P1_TOKEN 'O'
+#define P2_TOKEN 'X'
+#define EMPTY_TOKEN ' '
 
 #endif //PCH_H

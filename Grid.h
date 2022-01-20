@@ -1,8 +1,5 @@
 #pragma once
 
-#define P1_TOKEN 'O'
-#define P2_TOKEN 'X'
-#define EMPTY_TOKEN ' '
 
 class Grid final
 {

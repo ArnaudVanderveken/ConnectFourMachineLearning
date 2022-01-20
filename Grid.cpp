@@ -9,6 +9,8 @@ Grid::Grid()
 	{
 		m_Grid[i] = new char[7];
 	}
+
+	ResetGrid();
 }
 
 Grid::~Grid()
@@ -34,12 +36,12 @@ void Grid::ResetGrid()
 
 void Grid::InsertToken(char token, int column)
 {
-	int i{};
+	int i{ Grid::s_NrRows - 1 };
 	do 
 	{
-		if (m_Grid[i][column] != EMPTY_TOKEN)
+		if (m_Grid[i][column] == EMPTY_TOKEN)
 		{
-			m_Grid[i - 1][column] = token;
+			m_Grid[i][column] = token;
 
 			if (token == P1_TOKEN)
 			{
@@ -49,23 +51,22 @@ void Grid::InsertToken(char token, int column)
 			{
 				m_StateMatrix(0, i * 7 + column + 42) = 1.0f;
 			}
-
 			return;
 		}
-		++i;
-	} while (i < Grid::s_NrRows);
+		--i;
+	} while (i >= 0);
 }
 
 int Grid::GetAvailableRowInColumn(int column) const
 {
-	int i{};
+	int i{ Grid::s_NrRows - 1 };
 	do
 	{
-		if (m_Grid[i][column] != EMPTY_TOKEN)
+		if (m_Grid[i][column] == EMPTY_TOKEN)
 		{
 			return i;
 		}
-		++i;
+		--i;
 	} while (i < Grid::s_NrRows);
 	return -1;
 }
