@@ -22,10 +22,34 @@ void Play(Grid* pGrid, AI* pAI, bool isAIP1)
 		++roundCounter;
 		if (isAIP1)
 		{
+			//AI move
 			aiPlay = pAI->PlayMove(pGrid, isAIP1, false);
 			pGrid->InsertToken(P1_TOKEN, aiPlay);
 			cout << "AI played in column " << aiPlay << endl;
 			pGrid->Print();
+
+			//Check win conditions
+			winState = pGrid->CheckWinCondition();
+			switch (winState)
+			{
+			case Grid::WinState::none:
+				break;
+
+			case Grid::WinState::p1:
+				cout << "AI win\n" << endl;
+				gameLoop = false;
+				return;
+
+			case Grid::WinState::p2:
+				cout << "You win\n" << endl;
+				gameLoop = false;
+				return;
+
+			case Grid::WinState::draw:
+				cout << "Draw\n" << endl;
+				gameLoop = false;
+				return;
+			}
 
 			// Ask player input
 			bool validInput{};
@@ -38,6 +62,7 @@ void Play(Grid* pGrid, AI* pAI, bool isAIP1)
 			pGrid->InsertToken(P2_TOKEN, playerPlay);
 			pGrid->Print();
 
+			//Check win conditions
 			winState = pGrid->CheckWinCondition();
 			switch (winState)
 			{
@@ -47,17 +72,17 @@ void Play(Grid* pGrid, AI* pAI, bool isAIP1)
 			case Grid::WinState::p1:
 				cout << "AI win\n" << endl;
 				gameLoop = false;
-				break;
+				return;
 
 			case Grid::WinState::p2:
 				cout << "You win\n" << endl;
 				gameLoop = false;
-				break;
+				return;
 
 			case Grid::WinState::draw:
 				cout << "Draw\n" << endl;
 				gameLoop = false;
-				break;
+				return;
 			}
 		}
 		else
@@ -73,11 +98,36 @@ void Play(Grid* pGrid, AI* pAI, bool isAIP1)
 			pGrid->InsertToken(P1_TOKEN, playerPlay);
 			pGrid->Print();
 
+			//Check win conditions
+			winState = pGrid->CheckWinCondition();
+			switch (winState)
+			{
+			case Grid::WinState::none:
+				break;
+
+			case Grid::WinState::p1:
+				cout << "AI win\n" << endl;
+				gameLoop = false;
+				return;
+
+			case Grid::WinState::p2:
+				cout << "You win\n" << endl;
+				gameLoop = false;
+				return;
+
+			case Grid::WinState::draw:
+				cout << "Draw\n" << endl;
+				gameLoop = false;
+				return;
+			}
+
+			//AI move
 			aiPlay = pAI->PlayMove(pGrid, isAIP1, false);
 			pGrid->InsertToken(P2_TOKEN, aiPlay);
 			cout << "AI played in column " << aiPlay << endl;
 			pGrid->Print();
 
+			//Check Win conditions
 			winState = pGrid->CheckWinCondition();
 			switch (winState)
 			{

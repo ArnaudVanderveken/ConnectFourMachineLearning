@@ -43,8 +43,8 @@ int AI::PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode)
 		playState = gridState;
 	else
 	{
-		playState << gridState.block(0, 42, 1, 42);
-		playState << gridState.block(0, 0, 1, 42);
+		playState.block(0, 0, 1, 42) = gridState.block(0, 42, 1, 42);
+		playState.block(0, 42, 1, 42) = gridState.block(0, 0, 1, 42);
 	}
 
 	for (int i{}; i < 7; ++i)
@@ -69,6 +69,13 @@ void AI::SaveToFile(string filename)
 	output.open(filename);
 
 	//TODO: write content to file
+	//To write:
+	// Learning method (0 - 1)
+	// Epsilon
+	// LearningRate
+	// If TDLambda Lambda
+	// Wint
+	// Wout
 
 	output.close();
 }
