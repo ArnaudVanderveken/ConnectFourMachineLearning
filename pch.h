@@ -20,11 +20,13 @@
 #include <cassert>
 #include <memory>
 #include <string>
+#include <fstream>
+#include <regex>
 
 #include "Enums.h"
 
 #define P1_TOKEN 'O'
 #define P2_TOKEN 'X'
-#define EMPTY_TOKEN ' '
+#define EMPTY_TOKEN '.'
 
 #endif //PCH_H

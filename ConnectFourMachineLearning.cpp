@@ -2,7 +2,7 @@
 #include "Grid.h"
 #include "AI.h"
 
-using std::cout, std::cin, std::endl, std::string;
+using std::cout, std::cin, std::endl, std::string, std::ifstream, std::regex, std::regex_match;
 
 void Train(Grid* pGrid, AI* pAI, uint32_t rounds)
 {
@@ -103,29 +103,12 @@ void Play(Grid* pGrid, AI* pAI, bool isAIP1)
 	}
 }
 
-int main()
+AI* SetUpAI()
 {
-	auto pGrid{ std::make_unique<Grid>() };
-
-	GameMode gameMode{};
 	AILearning aiLearning{};
 	float epsilon{}, learningRate{}, lambda{};
 
-	bool gameLoop{ true };
-
-	string command{};
-
-	// Select Gamemode
-	do {
-		cout << "GameMode: (play - train)" << endl;
-		cin >> command;
-	} while (command != "play" && command != "train");
-
-	if (command == "play")
-		gameMode = GameMode::play;
-	else
-		gameMode = GameMode::train;
-
+	string command;
 
 	//Select AI learning method
 	do {
@@ -153,7 +136,59 @@ int main()
 		cin >> lambda;
 	}
 
-	auto pAI{ std::make_unique<AI>(epsilon, learningRate, lambda) };
+	return new AI(epsilon, learningRate, lambda);
+}
+
+AI* LoadAI(string filename)
+{
+	return nullptr;
+}
+
+int main()
+{
+	auto pGrid{ std::make_unique<Grid>() };
+
+	GameMode gameMode{};
+
+	bool gameLoop{ true };
+
+	string command{};
+
+	// Select Gamemode
+	do {
+		cout << "GameMode: (play - train)" << endl;
+		cin >> command;
+	} while (command != "play" && command != "train");
+
+	if (command == "play")
+		gameMode = GameMode::play;
+	else
+		gameMode = GameMode::train;
+
+	// Selet AI
+	do {
+		cout << "AI Setup: (create - load)" << endl;
+		cin >> command;
+	} while (command != "create" && command != "load");
+
+	AI* pAI{};
+	if (command == "create")
+		 pAI = SetUpAI();
+	else
+	{
+		bool valid{};
+		do {
+			cout << "File to load from: (with .aidata extension)" << endl;
+			cin >> command;
+			
+			const regex extension{ ".+\\.aidata$" };
+
+			valid = regex_match(command, extension);
+
+		} while (!valid);
+
+		pAI = LoadAI(command);
+	}
 
 	uint32_t roundsCounter{};
 
@@ -163,7 +198,7 @@ int main()
 		while (gameLoop)
 		{
 			++roundsCounter;
-			Play(pGrid.get(), pAI.get(), (roundsCounter % 2) == 0);
+			Play(pGrid.get(), pAI, (roundsCounter % 2) == 0);
 
 			// ASk for rematch
 			do {
@@ -191,4 +226,7 @@ int main()
 
 		break;
 	}
+
+	//CleanUP
+	delete pAI;
 }

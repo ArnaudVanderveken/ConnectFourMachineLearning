@@ -1,11 +1,14 @@
 #pragma once
 
+using std::string, std::ofstream;
+
 class Grid;
 
 class AI final
 {
 public:
 	AI(float epsilon, float learningRate, float lambda);
+	AI(string filename);
 	~AI() = default;
 	AI(const AI&) = delete;
 	AI& operator=(const AI&) = delete;
@@ -14,11 +17,13 @@ public:
 
 	int PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode);
 
+	void SaveToFile(string filename);
+
 private:
 	static const int s_InnerLayerNeuronCount{ 84 };
-	const float m_Epsilon;
-	const float m_LearningRate;
-	const float m_Lambda;
+	float m_Epsilon;
+	float m_LearningRate;
+	float m_Lambda;
 
 	Eigen::Matrix<float, 84, s_InnerLayerNeuronCount> m_Wint;
 	Eigen::Matrix<float, s_InnerLayerNeuronCount, 1> m_Wout;

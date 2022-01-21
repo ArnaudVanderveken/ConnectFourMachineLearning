@@ -15,6 +15,13 @@ AI::AI(float epsilon, float learningRate, float lambda)
 	m_Wout = normal<Matrix<float, s_InnerLayerNeuronCount, 1>>(s_InnerLayerNeuronCount, 1, urng, 0.0f, 0.0001f);
 }
 
+AI::AI(string filename)
+{
+	m_Epsilon = 0;
+	m_LearningRate = 0;
+	m_Lambda = 0;
+}
+
 int AI::PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode)
 {
 	if (trainingMode) //Only do E-Greedy test in trainingMode. For an actual game, always play best move.
@@ -54,6 +61,16 @@ int AI::PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode)
 	}
 	auto it = std::max_element(probabilities.begin(), probabilities.end());
 	return (it - probabilities.begin()); //returns the column where to play (range 0 - 6)
+}
+
+void AI::SaveToFile(string filename)
+{
+	ofstream output{};
+	output.open(filename);
+
+	//TODO: write content to file
+
+	output.close();
 }
 
 float AI::NNForwardPass(const Matrix<float, 1, 84>& input) const
