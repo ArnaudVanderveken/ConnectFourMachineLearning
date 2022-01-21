@@ -67,7 +67,7 @@ int Grid::GetAvailableRowInColumn(int column) const
 			return i;
 		}
 		--i;
-	} while (i < Grid::s_NrRows);
+	} while (i >= 0);
 	return -1;
 }
 

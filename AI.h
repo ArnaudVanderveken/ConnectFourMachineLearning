@@ -7,7 +7,7 @@ class Grid;
 class AI final
 {
 public:
-	AI(float epsilon, float learningRate, float lambda);
+	AI(AILearning aiLearning, float epsilon, float learningRate, float lambda);
 	AI(string filename);
 	~AI() = default;
 	AI(const AI&) = delete;
@@ -15,12 +15,15 @@ public:
 	AI(AI&&) noexcept = delete;
 	AI& operator=(AI&&) noexcept = delete;
 
+	AILearning GetAILearning() const;
+
 	int PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode);
 
 	void SaveToFile(string filename);
 
 private:
 	static const int s_InnerLayerNeuronCount{ 84 };
+	AILearning m_AILearning;
 	float m_Epsilon;
 	float m_LearningRate;
 	float m_Lambda;

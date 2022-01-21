@@ -2,24 +2,67 @@
 #include "Grid.h"
 #include "AI.h"
 
-using std::cout, std::cin, std::endl, std::string, std::ifstream, std::regex, std::regex_match;
+using std::cout, std::cin, std::endl, std::string, std::ifstream, std::regex, std::regex_match, Eigen::Matrix;
 
 void Train(Grid* pGrid, AI* pAI, uint32_t rounds)
 {
+	for (uint32_t roundCounter{}; roundCounter < rounds; ++roundCounter)
+	{
+		bool gameLoop{ true };
+		
+		int aiPlay{};
 
+		while (gameLoop)
+		{
+			// AI as P1
+			aiPlay = pAI->PlayMove(pGrid, (roundCounter % 2) == 0, true);
+			pGrid->InsertToken(P1_TOKEN, aiPlay);
+
+			//Check Win conditions
+			switch (pGrid->CheckWinCondition())
+			{
+			case Grid::WinState::p1:
+			case Grid::WinState::p2:
+			case Grid::WinState::draw:
+				gameLoop = false;
+				break;
+
+			default:
+				break;
+			}
+
+			//Early exit test
+			if (!gameLoop) break;
+
+			//AI as P2
+			aiPlay = pAI->PlayMove(pGrid, (roundCounter % 2) == 1, true);
+			pGrid->InsertToken(P2_TOKEN, aiPlay);
+
+			//Check Win conditions
+			switch (pGrid->CheckWinCondition())
+			{
+			case Grid::WinState::p1:
+			case Grid::WinState::p2:
+			case Grid::WinState::draw:
+				gameLoop = false;
+				break;
+
+			default:
+				break;
+			}
+		}
+		pGrid->ResetGrid();
+	}
 }
 
 void Play(Grid* pGrid, AI* pAI, bool isAIP1)
 {
 	bool gameLoop{ true };
-	uint32_t roundCounter{};
 
 	int aiPlay{}, playerPlay{};
-	Grid::WinState winState;
 
 	while (gameLoop)
 	{
-		++roundCounter;
 		if (isAIP1)
 		{
 			//AI move
@@ -29,8 +72,7 @@ void Play(Grid* pGrid, AI* pAI, bool isAIP1)
 			pGrid->Print();
 
 			//Check win conditions
-			winState = pGrid->CheckWinCondition();
-			switch (winState)
+			switch (pGrid->CheckWinCondition())
 			{
 			case Grid::WinState::none:
 				break;
@@ -63,8 +105,7 @@ void Play(Grid* pGrid, AI* pAI, bool isAIP1)
 			pGrid->Print();
 
 			//Check win conditions
-			winState = pGrid->CheckWinCondition();
-			switch (winState)
+			switch (pGrid->CheckWinCondition())
 			{
 			case Grid::WinState::none:
 				break;
@@ -99,19 +140,18 @@ void Play(Grid* pGrid, AI* pAI, bool isAIP1)
 			pGrid->Print();
 
 			//Check win conditions
-			winState = pGrid->CheckWinCondition();
-			switch (winState)
+			switch (pGrid->CheckWinCondition())
 			{
 			case Grid::WinState::none:
 				break;
 
 			case Grid::WinState::p1:
-				cout << "AI win\n" << endl;
+				cout << "You win\n" << endl;
 				gameLoop = false;
 				return;
 
 			case Grid::WinState::p2:
-				cout << "You win\n" << endl;
+				cout << "AI win\n" << endl;
 				gameLoop = false;
 				return;
 
@@ -128,8 +168,7 @@ void Play(Grid* pGrid, AI* pAI, bool isAIP1)
 			pGrid->Print();
 
 			//Check Win conditions
-			winState = pGrid->CheckWinCondition();
-			switch (winState)
+			switch (pGrid->CheckWinCondition())
 			{
 			case Grid::WinState::none:
 				break;
@@ -137,17 +176,17 @@ void Play(Grid* pGrid, AI* pAI, bool isAIP1)
 			case Grid::WinState::p1:
 				cout << "You win\n" << endl;
 				gameLoop = false;
-				break;
+				return;
 
 			case Grid::WinState::p2:
 				cout << "AI win\n" << endl;
 				gameLoop = false;
-				break;
+				return;
 
 			case Grid::WinState::draw:
 				cout << "Draw\n" << endl;
 				gameLoop = false;
-				break;
+				return;
 			}
 		}
 	}
@@ -186,7 +225,7 @@ AI* SetUpAI()
 		cin >> lambda;
 	}
 
-	return new AI(epsilon, learningRate, lambda);
+	return new AI(aiLearning, epsilon, learningRate, lambda);
 }
 
 AI* LoadAI(string filename)
@@ -197,86 +236,116 @@ AI* LoadAI(string filename)
 int main()
 {
 	auto pGrid{ std::make_unique<Grid>() };
-
+	AI* pAI{};
 	GameMode gameMode{};
 
-	bool gameLoop{ true };
-
 	string command{};
+	bool mainLoop{ true }, gameLoop{ true };
 
-	// Select Gamemode
-	do {
-		cout << "GameMode: (play - train)" << endl;
-		cin >> command;
-	} while (command != "play" && command != "train");
-
-	if (command == "play")
-		gameMode = GameMode::play;
-	else
-		gameMode = GameMode::train;
-
-	// Selet AI
-	do {
-		cout << "AI Setup: (create - load)" << endl;
-		cin >> command;
-	} while (command != "create" && command != "load");
-
-	AI* pAI{};
-	if (command == "create")
-		 pAI = SetUpAI();
-	else
+	while (mainLoop)
 	{
+
+		// Select Gamemode
+		do {
+			cout << "GameMode: (play - train - quit)" << endl;
+			cin >> command;
+		} while (command != "play" && command != "train" && command != "quit");
+
+		//Exit program
+		if (command == "quit")
+		{
+			mainLoop = false;
+			break;
+		}
+
+		if (command == "play")
+			gameMode = GameMode::play;
+		else
+			gameMode = GameMode::train;
+
+		// Selet AI
 		bool valid{};
 		do {
-			cout << "File to load from: (with .aidata extension)" << endl;
+			cout << "AI Setup: (create - load - keep)" << endl;
 			cin >> command;
-			
-			const regex extension{ ".+\\.aidata$" };
 
-			valid = regex_match(command, extension);
+			valid = (command == "create") || (command == "load") || (command == "keep");
 
+			if (command == "keep" && pAI == nullptr)
+			{
+				cout << "No AI in memory" << endl;
+				valid = false;
+			}
 		} while (!valid);
 
-		pAI = LoadAI(command);
-	}
 
-	uint32_t roundsCounter{};
-
-	switch (gameMode)
-	{
-	case GameMode::play:
-		while (gameLoop)
+		if (command == "create")
 		{
-			++roundsCounter;
-			Play(pGrid.get(), pAI, (roundsCounter % 2) == 0);
-
-			// ASk for rematch
-			do {
-				cout << "Play again ? [y/n] ";
-				cin >> command;
-			} while (command != "y" && command != "n");
-
-			if (command == "y")
-			{
-				pGrid->ResetGrid();
-				cout << endl;
-			}
-			else
-			{
-				gameLoop = false;
-			}
+			//Delete old AI if existing
+			if (pAI != nullptr) delete pAI;
+			pAI = SetUpAI();
 		}
-		break;
+		else if (command == "load")
+		{
+			//Delete old AI if existing
+			if (pAI != nullptr) delete pAI;
 
-	case GameMode::train:
-		uint32_t rounds{};
-		// Set number of rounds;
-		cout << "Nr of training rounds: (uint32_t)" << endl;
-		cin >> rounds;
+			bool valid{};
+			do {
+				cout << "File to load from: (with .aidata extension)" << endl;
+				cin >> command;
 
-		break;
+				const regex extension{ ".+\\.aidata$" };
+
+				valid = regex_match(command, extension);
+
+			} while (!valid);
+
+			pAI = LoadAI(command);
+		}
+
+		uint32_t roundsCounter{};
+
+		switch (gameMode)
+		{
+		case GameMode::play:
+			while (gameLoop)
+			{
+				++roundsCounter;
+				Play(pGrid.get(), pAI, (roundsCounter % 2) == 0);
+
+				// ASk for rematch
+				do {
+					cout << "Play again ? [y/n] ";
+					cin >> command;
+				} while (command != "y" && command != "n");
+
+				if (command == "y")
+				{
+					pGrid->ResetGrid();
+					cout << endl;
+				}
+				else
+				{
+					gameLoop = false;
+				}
+			}
+			break;
+
+		case GameMode::train:
+			uint32_t rounds{};
+			// Set number of rounds;
+			cout << "Nr of training rounds: (uint32_t)" << endl;
+			cin >> rounds;
+
+			Train(pGrid.get(), pAI, rounds);
+
+			break;
+		}
 	}
 
 	//CleanUP
 	delete pAI;
+
+	return 0;
 }

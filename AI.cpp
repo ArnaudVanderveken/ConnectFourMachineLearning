@@ -4,8 +4,9 @@
 
 using Eigen::Rand::normal, Eigen::Matrix, std::vector;
 
-AI::AI(float epsilon, float learningRate, float lambda)
-	: m_Epsilon{ std::clamp(epsilon, 0.0f, 1.0f) }
+AI::AI(AILearning aiLearning, float epsilon, float learningRate, float lambda)
+	: m_AILearning{ aiLearning }
+	, m_Epsilon{ std::clamp(epsilon, 0.0f, 1.0f) }
 	, m_LearningRate{ std::clamp(learningRate, 0.0f, 1.0f) }
 	, m_Lambda{ std::clamp(lambda, 0.0f, 1.0f) }
 {
@@ -17,34 +18,35 @@ AI::AI(float epsilon, float learningRate, float lambda)
 
 AI::AI(string filename)
 {
+	m_AILearning = AILearning::QLearning;
 	m_Epsilon = 0;
 	m_LearningRate = 0;
 	m_Lambda = 0;
 }
 
+AILearning AI::GetAILearning() const
+{
+	return m_AILearning;
+}
+
 int AI::PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode)
 {
-	if (trainingMode) //Only do E-Greedy test in trainingMode. For an actual game, always play best move.
-	{
-		//E-Greedy test. If value is below epsilon, play random move.
-		float greedyTest{ rand() / float(RAND_MAX) }; //float btwn 0.0f - 1.0f
-		if (greedyTest < m_Epsilon)
-			return (rand() % 7); //int btwn 0 - 6
-	}
+	int playedMove{}, bestMove{};
 
-	//Play the best move acording to the NN
+	//Find the best move acording to the NN
 	vector<float> probabilities;
 	probabilities.reserve(7);
-	Matrix<float, 1, 84> gridState{ pGrid->GetStateMatrix() }; //gridState always puts P1 in the first half and P2 in the second half of the matrix
+	Matrix<float, 1, 84> gridStateSavePre{ pGrid->GetStateMatrix() }; //gridState always puts P1 in the first half and P2 in the second half of the matrix
+	Matrix<float, 1, 84> gridStateSavePost{ pGrid->GetStateMatrix() };
 	Matrix<float, 1, 84> playState;
 
 	//Swap first and second halves of the gridState matrix if playing as P2
 	if (asPlayer1)
-		playState = gridState;
+		playState = gridStateSavePre;
 	else
 	{
-		playState.block(0, 0, 1, 42) = gridState.block(0, 42, 1, 42);
-		playState.block(0, 42, 1, 42) = gridState.block(0, 0, 1, 42);
+		playState.block(0, 0, 1, 42) = gridStateSavePre.block(0, 42, 1, 42);
+		playState.block(0, 42, 1, 42) = gridStateSavePre.block(0, 0, 1, 42);
 	}
 
 	for (int i{}; i < 7; ++i)
@@ -59,8 +61,42 @@ int AI::PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode)
 			playState(0, row * 7 + i) = 0.0f;
 		}
 	}
-	auto it = std::max_element(probabilities.begin(), probabilities.end());
-	return (it - probabilities.begin()); //returns the column where to play (range 0 - 6)
+	bestMove = std::max_element(probabilities.begin(), probabilities.end()) - probabilities.begin();
+	playedMove = bestMove; //Default
+
+	// E-greedy & learning only in trainingmode
+	if (trainingMode) //Only do E-Greedy test in trainingMode. For an actual game, always play best move.
+	{
+		//E-Greedy test. If value is below epsilon, play random move.
+		float greedyTest{ rand() / float(RAND_MAX) }; //float btwn 0.0f - 1.0f
+		if (greedyTest < m_Epsilon)
+		{
+			vector<int> possibleMoves;
+			for (int i{}; i < Grid::s_NrColumns; ++i)
+			{
+				if (!pGrid->IsColumnFull(i)) possibleMoves.push_back(i);
+			}
+			playedMove = possibleMoves[rand() % possibleMoves.size()];
+		}
+		// else playedMove = bestMove, as default if no training
+
+		int tmp;
+		switch (m_AILearning)
+		{
+		case AILearning::QLearning:
+			tmp = pGrid->GetAvailableRowInColumn(bestMove);
+			gridStateSavePost(0, tmp * Grid::s_NrColumns + bestMove) = 1.0f;
+			NNQLearning(gridStateSavePre, gridStateSavePost);
+			break;
+
+		case AILearning::TDLambda:
+			gridStateSavePost(0, pGrid->GetAvailableRowInColumn(playedMove) * Grid::s_NrColumns + playedMove) = 1.0f;
+			NNTDLambda(gridStateSavePre, gridStateSavePost);
+			break;
+		}
+	}
+
+	return playedMove;
 }
 
 void AI::SaveToFile(string filename)
@@ -104,7 +140,7 @@ void AI::NNQLearning(const Matrix<float, 1, 84>& oldState, const Matrix<float, 1
 
 	for (int i{}; i < s_InnerLayerNeuronCount; ++i)
 	{
-		float deltaInt = gradOut * m_Wout(0, i) * gradInt(0, i);
+		float deltaInt = gradOut * m_Wout(i, 0) * gradInt(0, i);
 		for (int j{}; j < 84; ++j)
 		{
 			m_Wint(j, i) -= m_LearningRate * delta * deltaInt * bestState(0, j);
@@ -119,7 +155,7 @@ void AI::NNTDLambda(const Matrix<float, 1, 84>& oldState, const Matrix<float, 1,
 
 float AI::Sigmoid(float x) const
 {
-	return 1.0f / (1.0f - powf(2.71828f, x));
+	return 1.0f / (1.0f + powf(2.71828f, -x));
 }
 
 const Matrix<float, 1, AI::s_InnerLayerNeuronCount>& AI::Sigmoid(Matrix<float, 1, s_InnerLayerNeuronCount>& m) const
