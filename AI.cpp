@@ -10,10 +10,12 @@ AI::AI(AILearning aiLearning, float epsilon, float learningRate, float lambda)
 	, m_LearningRate{ std::clamp(learningRate, 0.0f, 1.0f) }
 	, m_Lambda{ std::clamp(lambda, 0.0f, 1.0f) }
 {
-	// Initializing weights based on a normal distribution (mean 0.0, stdev 0.0001)
-	Eigen::Rand::P8_mt19937_64 urng{ 42 };
-	m_Wint = normal<Matrix<float, 84, s_InnerLayerNeuronCount>>(84, s_InnerLayerNeuronCount, urng, 0.0f, 0.0001f);
-	m_Wout = normal<Matrix<float, s_InnerLayerNeuronCount, 1>>(s_InnerLayerNeuronCount, 1, urng, 0.0f, 0.0001f);
+	// Initializing weights based on a normal distribution (mean 0.0, stdev 0.001)
+	//Eigen::Rand::P8_mt19937_64 urng{ 42 };
+	std::random_device rd;
+	std::mt19937 gen(rd());
+	m_Wint = normal<Matrix<float, 84, s_InnerLayerNeuronCount>>(84, s_InnerLayerNeuronCount, gen, 0.0f, 0.001f);
+	m_Wout = normal<Matrix<float, s_InnerLayerNeuronCount, 1>>(s_InnerLayerNeuronCount, 1, gen, 0.0f, 0.001f);
 }
 
 AI::AI(string filename)
@@ -143,9 +145,26 @@ void AI::NNQLearning(const Matrix<float, 1, 84>& oldState, const Matrix<float, 1
 		float deltaInt = gradOut * m_Wout(i, 0) * gradInt(0, i);
 		for (int j{}; j < 84; ++j)
 		{
-			m_Wint(j, i) -= m_LearningRate * delta * deltaInt * bestState(0, j);
+			m_Wint(j, i) -= m_LearningRate * delta * deltaInt * oldState(0, j);
 		}
 		m_Wout(i, 0) -= m_LearningRate * delta * gradOut * bestStatePInt(0, i);
+	}
+}
+
+void AI::NNQLearningFinal(const Eigen::Matrix<float, 1, 84>& oldState, float result)
+{
+	Matrix<float, 1, s_InnerLayerNeuronCount> intermediate{ oldState * m_Wint };
+	Matrix<float, 1, s_InnerLayerNeuronCount> bestStatePInt = Sigmoid(intermediate);
+
+	float delta{ NNForwardPass(oldState) - result };
+
+	for (int i{}; i < s_InnerLayerNeuronCount; ++i)
+	{
+		for (int j{}; j < 84; ++j)
+		{
+			m_Wint(j, i) -= m_LearningRate * delta * result * oldState(0, j);
+		}
+		m_Wout(i, 0) -= m_LearningRate * delta * result * bestStatePInt(0, i);
 	}
 }
 
@@ -155,7 +174,7 @@ void AI::NNTDLambda(const Matrix<float, 1, 84>& oldState, const Matrix<float, 1,
 
 float AI::Sigmoid(float x) const
 {
-	return 1.0f / (1.0f + powf(2.71828f, -x));
+	return 1.0f / (1.0f + exp(-x));
 }
 
 const Matrix<float, 1, AI::s_InnerLayerNeuronCount>& AI::Sigmoid(Matrix<float, 1, s_InnerLayerNeuronCount>& m) const

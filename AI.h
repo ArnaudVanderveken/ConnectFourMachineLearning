@@ -18,6 +18,7 @@ public:
 	AILearning GetAILearning() const;
 
 	int PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode);
+	void NNQLearningFinal(const Eigen::Matrix<float, 1, 84>& oldState, float result);
 
 	void SaveToFile(string filename);
 

@@ -29,4 +29,8 @@
 #define P2_TOKEN 'X'
 #define EMPTY_TOKEN '.'
 
+#define WIN_CREDITS 1.0f
+#define LOSS_CREDITS -1.0f
+#define DRAW_CREDITS 0.1f
+
 #endif //PCH_H
