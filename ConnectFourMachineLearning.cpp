@@ -8,51 +8,40 @@ using std::cout, std::cin, std::endl, std::string, std::ifstream, std::regex, st
 
 void Train(Grid* pGrid, AI* pAI, uint32_t rounds)
 {
-	for (uint32_t roundCounter{}; roundCounter < rounds; ++roundCounter)
+	for (uint32_t gamesCounter{}; gamesCounter < rounds; ++gamesCounter)
 	{
 		bool gameLoop{ true };
-		
+		uint32_t roundsCounter{};
 		int aiPlay{};
 
-		Matrix<float, 1, 84> gridStateSaveP1, gridStateSaveP2;
+		Matrix<float, 1, 84> gridStateSave;
 
 		while (gameLoop)
 		{
+			++roundsCounter;
+
 			// AI as P1
-			aiPlay = pAI->PlayMove(pGrid, (roundCounter % 2) == 0, true);
+			aiPlay = pAI->PlayMove(pGrid, (gamesCounter % 2) == 0, roundsCounter != 1u);
 			pGrid->InsertToken(P1_TOKEN, aiPlay);
 
 			//Check Win conditions
 			switch (pGrid->CheckWinCondition())
 			{
 			case Grid::WinState::p1:
-				gridStateSaveP1 = pGrid->GetStateMatrix();
-				gridStateSaveP2.block(0, 0, 1, 42) = gridStateSaveP1.block(0, 42, 1, 42);
-				gridStateSaveP2.block(0, 42, 1, 42) = gridStateSaveP1.block(0, 0, 1, 42);
-
-				pAI->NNQLearningFinal(gridStateSaveP1, WIN_CREDITS);
-				pAI->NNQLearningFinal(gridStateSaveP2, LOSS_CREDITS);
-
+				gridStateSave = pGrid->GetStateMatrix();
+				pAI->NNQLearningFinal(gridStateSave, WIN_CREDITS);
 				gameLoop = false;
 				break;
+
 			case Grid::WinState::p2:
-				gridStateSaveP1 = pGrid->GetStateMatrix();
-				gridStateSaveP2.block(0, 0, 1, 42) = gridStateSaveP1.block(0, 42, 1, 42);
-				gridStateSaveP2.block(0, 42, 1, 42) = gridStateSaveP1.block(0, 0, 1, 42);
-
-				pAI->NNQLearningFinal(gridStateSaveP1, LOSS_CREDITS);
-				pAI->NNQLearningFinal(gridStateSaveP2, WIN_CREDITS);
-
+				gridStateSave = pGrid->GetStateMatrix();
+				pAI->NNQLearningFinal(gridStateSave, LOSS_CREDITS);
 				gameLoop = false;
 				break;
+
 			case Grid::WinState::draw:
-				gridStateSaveP1 = pGrid->GetStateMatrix();
-				gridStateSaveP2.block(0, 0, 1, 42) = gridStateSaveP1.block(0, 42, 1, 42);
-				gridStateSaveP2.block(0, 42, 1, 42) = gridStateSaveP1.block(0, 0, 1, 42);
-
-				pAI->NNQLearningFinal(gridStateSaveP1, DRAW_CREDITS);
-				pAI->NNQLearningFinal(gridStateSaveP2, DRAW_CREDITS);
-
+				gridStateSave = pGrid->GetStateMatrix();
+				pAI->NNQLearningFinal(gridStateSave, DRAW_CREDITS);
 				gameLoop = false;
 				break;
 
@@ -64,40 +53,27 @@ void Train(Grid* pGrid, AI* pAI, uint32_t rounds)
 			if (!gameLoop) break;
 
 			//AI as P2
-			aiPlay = pAI->PlayMove(pGrid, (roundCounter % 2) == 1, true);
+			aiPlay = pAI->PlayMove(pGrid, (gamesCounter % 2) == 1, roundsCounter != 1u);
 			pGrid->InsertToken(P2_TOKEN, aiPlay);
 
 			//Check Win conditions
 			switch (pGrid->CheckWinCondition())
 			{
 			case Grid::WinState::p1:
-				gridStateSaveP1 = pGrid->GetStateMatrix();
-				gridStateSaveP2.block(0, 0, 1, 42) = gridStateSaveP1.block(0, 42, 1, 42);
-				gridStateSaveP2.block(0, 42, 1, 42) = gridStateSaveP1.block(0, 0, 1, 42);
-
-				pAI->NNQLearningFinal(gridStateSaveP1, WIN_CREDITS);
-				pAI->NNQLearningFinal(gridStateSaveP2, LOSS_CREDITS);
-
+				gridStateSave = pGrid->GetStateMatrix();
+				pAI->NNQLearningFinal(gridStateSave, WIN_CREDITS);
 				gameLoop = false;
 				break;
+
 			case Grid::WinState::p2:
-				gridStateSaveP1 = pGrid->GetStateMatrix();
-				gridStateSaveP2.block(0, 0, 1, 42) = gridStateSaveP1.block(0, 42, 1, 42);
-				gridStateSaveP2.block(0, 42, 1, 42) = gridStateSaveP1.block(0, 0, 1, 42);
-
-				pAI->NNQLearningFinal(gridStateSaveP1, LOSS_CREDITS);
-				pAI->NNQLearningFinal(gridStateSaveP2, WIN_CREDITS);
-
+				gridStateSave = pGrid->GetStateMatrix();
+				pAI->NNQLearningFinal(gridStateSave, LOSS_CREDITS);
 				gameLoop = false;
 				break;
+
 			case Grid::WinState::draw:
-				gridStateSaveP1 = pGrid->GetStateMatrix();
-				gridStateSaveP2.block(0, 0, 1, 42) = gridStateSaveP1.block(0, 42, 1, 42);
-				gridStateSaveP2.block(0, 42, 1, 42) = gridStateSaveP1.block(0, 0, 1, 42);
-
-				pAI->NNQLearningFinal(gridStateSaveP1, DRAW_CREDITS);
-				pAI->NNQLearningFinal(gridStateSaveP2, DRAW_CREDITS);
-
+				gridStateSave = pGrid->GetStateMatrix();
+				pAI->NNQLearningFinal(gridStateSave, DRAW_CREDITS);
 				gameLoop = false;
 				break;
 

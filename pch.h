@@ -22,6 +22,7 @@
 #include <string>
 #include <fstream>
 #include <regex>
+#include <math.h>
 
 #include "Enums.h"
 
@@ -31,6 +32,6 @@
 
 #define WIN_CREDITS 1.0f
 #define LOSS_CREDITS -1.0f
-#define DRAW_CREDITS 0.1f
+#define DRAW_CREDITS 0.0f
 
 #endif //PCH_H

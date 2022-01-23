@@ -4,10 +4,10 @@
 
 Grid::Grid()
 {
-	m_Grid = new char* [6];
+	m_Grid = new char* [s_NrRows];
 	for (int i{}; i < Grid::s_NrRows; ++i)
 	{
-		m_Grid[i] = new char[7];
+		m_Grid[i] = new char[s_NrColumns];
 	}
 
 	ResetGrid();
@@ -45,11 +45,11 @@ void Grid::InsertToken(char token, int column)
 
 			if (token == P1_TOKEN)
 			{
-				m_StateMatrix(0, i * 7 + column) = 1.0f;
+				m_StateMatrix(0, i * s_NrColumns + column) = 1.0f;
 			}
 			else
 			{
-				m_StateMatrix(0, i * 7 + column + 42) = 1.0f;
+				m_StateMatrix(0, i * s_NrColumns + column + (s_NrRows * s_NrColumns)) = 1.0f;
 			}
 			return;
 		}
