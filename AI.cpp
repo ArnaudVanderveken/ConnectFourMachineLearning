@@ -123,14 +123,6 @@ void AI::SaveToFile(string filename)
 	ofstream output{};
 	output.open(filename, std::ios::binary);
 
-	//TODO: write content to file
-	//To write:
-	// Learning method (0 - 1)
-	// Epsilon
-	// LearningRate
-	// If TDLambda Lambda
-	// Wint
-	// Wout
 	int AILearningMethod{ int(m_AILearning) };
 	output.write((const char *)&AILearningMethod, sizeof(int));
 	output.write((const char*)&m_Epsilon, sizeof(float));
