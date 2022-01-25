@@ -21,13 +21,13 @@ public:
 	void SaveToFile(string filename);
 
 private:
-	static const int s_InnerLayerNeuronCount{ 84 };
+	static const int s_InnerLayerNeuronCount{ 42 };
 	AILearning m_AILearning;
 	float m_Epsilon;
 	float m_LearningRate;
 	float m_Lambda;
 
-	Eigen::Matrix<float, 84, 1> m_Weights, m_Trace;
+	Eigen::Matrix<float, 42, 1> m_Weights, m_Trace;
 
 	float NNForwardPass(const Eigen::Matrix<float, 1, 84>& input) const;
 	void NNQLearning(const Eigen::Matrix<float, 1, 84>& oldState, const Eigen::Matrix<float, 1, 84>& bestState);
