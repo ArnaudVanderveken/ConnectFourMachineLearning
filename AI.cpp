@@ -2,7 +2,7 @@
 #include "AI.h"
 #include "Grid.h"
 
-using Eigen::Rand::normal, Eigen::Matrix, std::vector;
+using Eigen::Rand::normal, Eigen::Matrix, std::vector, std::ofstream, std::ifstream;
 
 AI::AI(AILearning aiLearning, float epsilon, float learningRate, float lambda)
 	: m_AILearning{ aiLearning }
@@ -15,6 +15,7 @@ AI::AI(AILearning aiLearning, float epsilon, float learningRate, float lambda)
 	std::random_device rd;
 	std::mt19937 gen(rd());
 	m_Weights = normal<Matrix<float, 84, 1>>(84, 1, gen, 0.0f, 0.001f);
+	m_Trace.fill(0);
 }
 
 AI::AI(string filename)
@@ -23,6 +24,37 @@ AI::AI(string filename)
 	m_Epsilon = 0;
 	m_LearningRate = 0;
 	m_Lambda = 0;
+
+	char* buffer = new char[sizeof(float) * m_Weights.rows() * m_Weights.cols()];
+
+	ifstream input;
+	input.open(filename, std::ios::binary);
+
+	input.read(buffer, sizeof(int));
+	m_AILearning = (AILearning(atoi(buffer)));
+
+	input.read(buffer, sizeof(float));
+	m_Epsilon = (float)atof(buffer);
+
+	if (m_AILearning == AILearning::TDLambda)
+	{
+		input.read(buffer, sizeof(float));
+		m_Lambda = (float)atof(buffer);
+	}
+
+	float* matrixData = new float[m_Weights.rows() * m_Weights.cols()];
+	input.read((char*)matrixData, sizeof(float) * m_Weights.rows() * m_Weights.cols());
+	m_Weights = Matrix<float, 84, 1>(matrixData);
+
+	if (m_AILearning == AILearning::TDLambda)
+	{
+		input.read((char*)matrixData, sizeof(float) * m_Trace.rows() * m_Trace.cols());
+		m_Trace = Matrix<float, 84, 1>(matrixData);
+	}
+
+	delete[] buffer;
+	delete[] matrixData;
+	input.close();
 }
 
 int AI::PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode)
@@ -89,7 +121,7 @@ int AI::PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode)
 void AI::SaveToFile(string filename)
 {
 	ofstream output{};
-	output.open(filename);
+	output.open(filename, std::ios::binary);
 
 	//TODO: write content to file
 	//To write:
@@ -99,6 +131,13 @@ void AI::SaveToFile(string filename)
 	// If TDLambda Lambda
 	// Wint
 	// Wout
+	int AILearningMethod{ int(m_AILearning) };
+	output.write((const char *)&AILearningMethod, sizeof(int));
+	output.write((const char*)&m_Epsilon, sizeof(float));
+	output.write((const char*)&m_LearningRate, sizeof(float));
+	if (m_AILearning == AILearning::TDLambda) output.write((const char*)&m_Lambda, sizeof(float));
+	output.write((const char*)m_Weights.data(), sizeof(float) * (uint32_t)m_Weights.rows() * (uint32_t)m_Weights.cols());
+	if (m_AILearning == AILearning::TDLambda)output.write((const char*)m_Trace.data(), sizeof(float) * (uint32_t)m_Trace.rows() * (uint32_t)m_Trace.cols());
 
 	output.close();
 }

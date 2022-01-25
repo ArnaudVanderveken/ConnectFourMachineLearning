@@ -1,6 +1,6 @@
 #pragma once
 
-using std::string, std::ofstream;
+using std::string;
 
 class Grid;
 
