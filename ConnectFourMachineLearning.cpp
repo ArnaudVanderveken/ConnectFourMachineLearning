@@ -284,7 +284,17 @@ AI* SetUpAI()
 
 AI* LoadAI(string filename)
 {
-	return nullptr;
+	return new AI(filename);
+}
+
+void SaveAI(AI* pAI)
+{
+	string filename;
+	cout << "Enter filename (without extension): " << endl;
+	cin >> filename;
+	filename += ".aidata";
+
+	pAI->SaveToFile(filename);
 }
 
 int main()
@@ -304,8 +314,17 @@ int main()
 
 		// Select Gamemode
 		do {
-			cout << "GameMode: (play - train - quit)" << endl;
+			cout << "GameMode: (play - train - save - quit)" << endl;
 			cin >> command;
+			if (command == "save")
+			{
+				if (!pAI)
+				{
+					cout << "No AI to save." << endl;
+					continue;
+				}
+				SaveAI(pAI);
+			}
 		} while (command != "play" && command != "train" && command != "quit");
 
 		//Exit program

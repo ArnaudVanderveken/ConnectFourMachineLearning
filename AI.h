@@ -1,6 +1,6 @@
 #pragma once
 
-using std::string, std::ofstream;
+using std::string;
 
 class Grid;
 
@@ -29,8 +29,8 @@ private:
 	float m_LearningRate;
 	float m_Lambda;
 
-	Eigen::Matrix<float, 84, s_InnerLayerNeuronCount> m_Wint;
-	Eigen::Matrix<float, s_InnerLayerNeuronCount, 1> m_Wout;
+	Eigen::Matrix<float, 84, s_InnerLayerNeuronCount> m_Wint, m_TraceInt;
+	Eigen::Matrix<float, s_InnerLayerNeuronCount, 1> m_Wout, m_TraceOut;
 
 	float NNForwardPass(const Eigen::Matrix<float, 1, 84>& input) const;
 	void NNQLearning(const Eigen::Matrix<float, 1, 84>& oldState, const Eigen::Matrix<float, 1, 84>& bestState);
