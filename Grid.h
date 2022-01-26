@@ -27,13 +27,13 @@ public:
 	char** GetGrid() const;
 	void Print() const;
 
-	const Eigen::Matrix<float, 1, 84>& GetStateMatrix() const;
+	const Eigen::Matrix<float, 1, 42>& GetStateMatrix() const;
 
 	WinState CheckWinCondition() const;
 
 private:
 	char** m_Grid;
-	Eigen::Matrix<float, 1, 84> m_StateMatrix;
+	Eigen::Matrix<float, 1, 42> m_StateMatrix;
 
 };
 

@@ -14,7 +14,7 @@ void Train(Grid* pGrid, AI* pAI, uint32_t rounds)
 		uint32_t roundsCounter{};
 		int aiPlay{};
 
-		Matrix<float, 1, 84> gridStateSave;
+		Matrix<float, 1, 42> gridStateSave;
 
 		while (gameLoop)
 		{

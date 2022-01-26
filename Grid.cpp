@@ -45,11 +45,7 @@ void Grid::InsertToken(char token, int column)
 
 			if (token == P1_TOKEN)
 			{
-				m_StateMatrix(0, i * s_NrColumns + column) = 1.0f;
-			}
-			else
-			{
-				m_StateMatrix(0, i * s_NrColumns + column + (s_NrRows * s_NrColumns)) = 1.0f;
+				m_StateMatrix(0, i * s_NrColumns + column) = token == P1_TOKEN ? 1.0f : -1.0f;
 			}
 			return;
 		}
@@ -95,7 +91,7 @@ void Grid::Print() const
 	std::cout << std::endl;
 }
 
-const Eigen::Matrix<float, 1, 84>& Grid::GetStateMatrix() const
+const Eigen::Matrix<float, 1, 42>& Grid::GetStateMatrix() const
 {
 	return m_StateMatrix;
 }

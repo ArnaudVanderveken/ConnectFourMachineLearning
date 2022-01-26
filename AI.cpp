@@ -14,7 +14,7 @@ AI::AI(AILearning aiLearning, float epsilon, float learningRate, float lambda)
 	//Eigen::Rand::P8_mt19937_64 urng{ 42 };
 	std::random_device rd;
 	std::mt19937 gen(rd());
-	m_Weights = normal<Matrix<float, 84, 1>>(84, 1, gen, 0.0f, 0.001f);
+	m_Weights = normal<Matrix<float, 42, 1>>(42, 1, gen, 0.0f, 0.001f);
 	m_Trace.fill(0);
 }
 
@@ -44,12 +44,12 @@ AI::AI(string filename)
 
 	float* matrixData = new float[m_Weights.rows() * m_Weights.cols()];
 	input.read((char*)matrixData, sizeof(float) * m_Weights.rows() * m_Weights.cols());
-	m_Weights = Matrix<float, 84, 1>(matrixData);
+	m_Weights = Matrix<float, 42, 1>(matrixData);
 
 	if (m_AILearning == AILearning::TDLambda)
 	{
 		input.read((char*)matrixData, sizeof(float) * m_Trace.rows() * m_Trace.cols());
-		m_Trace = Matrix<float, 84, 1>(matrixData);
+		m_Trace = Matrix<float, 42, 1>(matrixData);
 	}
 
 	delete[] buffer;
@@ -64,8 +64,8 @@ int AI::PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode)
 	//Find the best move acording to the NN
 	vector<float> probabilities;
 	probabilities.reserve(7);
-	Matrix<float, 1, 84> gridStateSavePre{ pGrid->GetStateMatrix() };
-	Matrix<float, 1, 84> gridStateSavePost{ pGrid->GetStateMatrix() };
+	Matrix<float, 1, 42> gridStateSavePre{ pGrid->GetStateMatrix() };
+	Matrix<float, 1, 42> gridStateSavePost{ pGrid->GetStateMatrix() };
 
 	for (int i{}; i < 7; ++i)
 	{
@@ -104,12 +104,12 @@ int AI::PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode)
 		switch (m_AILearning)
 		{
 		case AILearning::QLearning:
-			gridStateSavePost(0, pGrid->GetAvailableRowInColumn(bestMove) * Grid::s_NrColumns + bestMove + (asPlayer1 ? 0 : 42)) = 1.0f;
+			gridStateSavePost(0, pGrid->GetAvailableRowInColumn(bestMove) * Grid::s_NrColumns + bestMove) = asPlayer1 ? 1.0f : -1.0f;
 			NNQLearning(gridStateSavePre, gridStateSavePost);
 			break;
 
 		case AILearning::TDLambda:
-			gridStateSavePost(0, pGrid->GetAvailableRowInColumn(playedMove) * Grid::s_NrColumns + playedMove + (asPlayer1 ? 0 : 42)) = 1.0f;
+			gridStateSavePost(0, pGrid->GetAvailableRowInColumn(playedMove) * Grid::s_NrColumns + playedMove) = asPlayer1 ? 1.0f : -1.0f;
 			NNTDLambda(gridStateSavePre, gridStateSavePost);
 			break;
 		}
@@ -134,33 +134,34 @@ void AI::SaveToFile(string filename)
 	output.close();
 }
 
-float AI::NNForwardPass(const Matrix<float, 1, 84>& input) const
+float AI::NNForwardPass(const Matrix<float, 1, 42>& input) const
 {
-	return std::tanhf(input * m_Weights);
+	return Sigmoid(input * m_Weights);
 }
 
-void AI::NNQLearning(const Matrix<float, 1, 84>& oldState, const Matrix<float, 1, 84>& bestState)
+void AI::NNQLearning(const Matrix<float, 1, 42>& oldState, const Matrix<float, 1, 42>& bestState)
 {
 	float oldStatePOut{ NNForwardPass(oldState) };
-	float delta{ oldStatePOut - NNForwardPass(bestState) };
+	float delta{ NNForwardPass(bestState) - oldStatePOut };
+	float grad{ oldStatePOut * (1 - oldStatePOut) }; //Sigmoid derivative.
 
-	for (int i{}; i < s_InnerLayerNeuronCount; ++i)
+	for (int i{}; i < 42; ++i)
 	{
-		m_Weights(i, 0) -= m_LearningRate * delta * oldState(0, i);
+		m_Weights(i, 0) += m_LearningRate * delta * grad * oldState(0, i);
 	}
 }
 
-void AI::NNQLearningFinal(const Eigen::Matrix<float, 1, 84>& oldState, float result)
+void AI::NNQLearningFinal(const Eigen::Matrix<float, 1, 42>& oldState, float result)
 {
-	float delta{ NNForwardPass(oldState) - result };
+	float delta{ result - NNForwardPass(oldState) };
 
-	for (int i{}; i < s_InnerLayerNeuronCount; ++i)
+	for (int i{}; i < 42; ++i)
 	{
-		m_Weights(i, 0) -= m_LearningRate * delta * oldState(0, i);
+		m_Weights(i, 0) += m_LearningRate * delta * oldState(0, i);
 	}
 }
 
-void AI::NNTDLambda(const Matrix<float, 1, 84>& oldState, const Matrix<float, 1, 84>& playedState)
+void AI::NNTDLambda(const Matrix<float, 1, 42>& oldState, const Matrix<float, 1, 42>& playedState)
 {
 }
 
