@@ -33,12 +33,6 @@ void Train(Grid* pGrid, AI* pAI, uint32_t rounds)
 				gameLoop = false;
 				break;
 
-			case Grid::WinState::p2:
-				gridStateSave = pGrid->GetStateMatrix();
-				pAI->NNQLearningFinal(gridStateSave, LOSS_CREDITS);
-				gameLoop = false;
-				break;
-
 			case Grid::WinState::draw:
 				gridStateSave = pGrid->GetStateMatrix();
 				pAI->NNQLearningFinal(gridStateSave, DRAW_CREDITS);
@@ -59,12 +53,6 @@ void Train(Grid* pGrid, AI* pAI, uint32_t rounds)
 			//Check Win conditions
 			switch (pGrid->CheckWinCondition())
 			{
-			case Grid::WinState::p1:
-				gridStateSave = pGrid->GetStateMatrix();
-				pAI->NNQLearningFinal(gridStateSave, WIN_CREDITS);
-				gameLoop = false;
-				break;
-
 			case Grid::WinState::p2:
 				gridStateSave = pGrid->GetStateMatrix();
 				pAI->NNQLearningFinal(gridStateSave, LOSS_CREDITS);

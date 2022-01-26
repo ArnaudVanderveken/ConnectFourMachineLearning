@@ -163,6 +163,15 @@ void AI::NNQLearningFinal(const Eigen::Matrix<float, 1, 42>& oldState, float res
 
 void AI::NNTDLambda(const Matrix<float, 1, 42>& oldState, const Matrix<float, 1, 42>& playedState)
 {
+	float oldStatePOut{ NNForwardPass(oldState) };
+	float delta{ NNForwardPass(playedState) - oldStatePOut };
+	float grad{ oldStatePOut * (1 - oldStatePOut) }; //Sigmoid derivative.
+
+	for (int i{}; i < 42; ++i)
+	{
+		m_Trace(i, 0) = m_Lambda * m_Trace(i, 0) + grad * oldState(0, i);
+		m_Weights(i, 0) += m_LearningRate * delta * m_Trace(i, 0);
+	}
 }
 
 float AI::Sigmoid(float x) const
