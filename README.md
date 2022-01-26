@@ -38,17 +38,17 @@ Another parameter of the network is its *Learning Rate*. This float can hold a v
 When creating a new AI, you have the option to choose between two learning methods: Qlearning, and Temporal-Difference Lambda (aka TDLambda)
 
 #### QLearning
-This method relies on the [QLearning Algorithm](https://en.wikipedia.org/wiki/Q-learning). To update the weight matrices of the network, QLearning will compare the win probability (optained by passing a game state through the neural network) of the state pre-move and the state corresponding to the best possible move, even if the AI plays a random move due to exploration. This gives the advantage not to penalize the networ for exploring other potential solutions.
+This method relies on the [QLearning Algorithm](https://en.wikipedia.org/wiki/Q-learning). To update the weight matrices of the network, QLearning will compare the win probability (optained by passing a game state through the neural network) of the state pre-move and the state corresponding to the best possible move, even if the AI plays a random move due to exploration. This gives the advantage not to penalize the network for exploring other potential solutions.
 
-This delta in the probabilities will be used as reward. To propagate this reward in the network, we use the [Backpropagation](https://en.wikipedia.org/wiki/Backpropagation) principle, meaning we start at the output layer of the network and moving backwards through the layers towards the input layer.
+This delta in the probabilities will be used as reward. To propagate this reward in the network, we use the [Backpropagation](https://en.wikipedia.org/wiki/Backpropagation) principle, meaning that we start at the output layer of the network and move backwards through the layers towards the input layer.
 
 #### TDLambda
-[TDLambda](https://en.wikipedia.org/wiki/Temporal_difference_learning) is somewhat simial to the QLearning approach, but differs on two points. First it uses the actual move played to determine the probability delta, instead of the best move like in QLearning.
+[TDLambda](https://en.wikipedia.org/wiki/Temporal_difference_learning) is somewhat similar to the QLearning approach, but differs in two points. First, it uses the actual played move to determine the probability delta, instead of the best move like in QLearning.
 
 But the biggest difference resides in the use of Trace matrices, one per weight matrix in the network. Reset to 0 before each game, those trace matrices are used as a memory of the prior updates applied to the network. Instead of directly update the weights of the matrices, those changes are added to the trace matrix, then this matrix is used to update the weights. Before adding the new change to the trace matrix, the previous value stored in it gets multiplied by *Lambda*, the factor that controls how long each change will affect future updates in the weights. The closer to 0.0 lambda is, the shorter term is the memory, the closer to 1.0, the longer. Two remarcable values: 0.0 will result in an erasure of the memory in between each move, thus results in a similar update as if directly updating the weights; and 1.0 which preserves in memory all updates that happened throughout the entire game, thus corresponding to the [Monte-Carlo](https://levelup.gitconnected.com/fundamental-of-reinforcement-learning-monte-carlo-algorithm-85428dc77f76) reinforcement method.
 
 ### Wait, this is a two player game !
-Indeed, but this does not prevent the AI to train against itself using the same neural network and weight matrices! You can consider that the best move for the player two is actually the worst move for the player one, and because our neural network only give the win probability for each given state, it's up to us to decide wether using the highest or the lowest in order to determine the played move.
+Indeed, but this does not prevent the AI to train against itself using the same neural network and weight matrices! You can consider that the best move for the player two is actually the worst move for the player one, and because our neural network only give the win probability for each given state, it's up to us to decide wether to use the highest or the lowest score in order to determine the played move.
 
 ## Neural Network Architecture
 ### Game state
@@ -56,19 +56,19 @@ A game state is a representation of the Connect Four's grid in the shape of a bi
 
 ### Neural network
 #### Input layer
-The input layer consists of a one by eighty-four matrix, thus matching the dimensions of a game state vector, allowing them to be bassed as inputs to the network.
+The input layer consists of a one by eighty-four matrix, thus matching the dimensions of a game state vector, allowing them to be passed as inputs to the network.
 
 #### Hidden layer
-This architecture owns a single hidden layer, whose size can be chosen freely. In this case I've chosen it to be made out of eighty-four neurons as well. This also gives us the dimensions of our first weight matrix between the input and hidden layers: an eighty-four by eighty-four matrix.
+This architecture owns a single hidden layer, whose size can be chosen freely. In this case, I've chosen it to be made out of eighty-four neurons as well. This also gives us the dimensions of our first weight matrix between the input and hidden layers: an eighty-four by eighty-four matrix.
 
 #### Output layer
-The output layer consists of a single neuron. In concequences, the second weight matrix will be an eighty-four by one matrix.
+The output layer consists of a single neuron. In concequences, the second weight matrix, between the hidden layer and the output layer, will be an eighty-four by one matrix.
 
 #### Weights initialization
 The weights are initialized using a normal distribution with a mean of 0.0 and standard deviation of 0.001. Zero-initialization of these matrix would result in a non-evoluting network, as 0 is absorbant in multiplication. The weights would always remain 0. Using such a distribution allows to dodge that issue, while keeping the weights close to 0, having the least impact on the first moves of the AI.
 
 ### Activation function
-In order for the neural network to function properly, an activation function is required. In this case, [Sigmoid](https://en.wikipedia.org/wiki/Sigmoid_function#:~:text=A%20sigmoid%20function%20is%20a,shaped%20curve%20or%20sigmoid%20curve.&text=Sigmoid%20functions%20most%20often%20show,is%20from%20%E2%88%921%20to%201.) has been used on each layer. Other options are available, like [ReLU](https://en.wikipedia.org/wiki/Rectifier_(neural_networks)) or the hyperbolic tangent, each having their pros and cons depending of the use case of the network. In this case, sigmoid has been chosen because its image domain ranges from 0 to 1, perfect to represent a probability. Different activation function can be used on each layer.
+In order for the neural network to function properly, an activation function is required. In this case, [Sigmoid](https://en.wikipedia.org/wiki/Sigmoid_function#:~:text=A%20sigmoid%20function%20is%20a,shaped%20curve%20or%20sigmoid%20curve.&text=Sigmoid%20functions%20most%20often%20show,is%20from%20%E2%88%921%20to%201.) has been used on each layer. Other options are available, like [ReLU](https://en.wikipedia.org/wiki/Rectifier_(neural_networks)) or the hyperbolic tangent, each having their pros and cons depending of the use case of the network. In this case, sigmoid has been chosen because its image domain ranges from 0 to 1, which is perfect to represent a probability. Different activation function can be used on each layer.
 
 ## Requirements
 The libraries used are:
