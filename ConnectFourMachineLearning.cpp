@@ -14,7 +14,7 @@ void Train(Grid* pGrid, AI* pAI, uint32_t rounds)
 		
 		int aiPlay{};
 
-		Matrix<float, 1, 84> gridStateSaveP1, gridStateSaveP2;
+		Matrix<float, 1, 84> gridStateSave;
 
 		while (gameLoop)
 		{
@@ -26,33 +26,20 @@ void Train(Grid* pGrid, AI* pAI, uint32_t rounds)
 			switch (pGrid->CheckWinCondition())
 			{
 			case Grid::WinState::p1:
-				gridStateSaveP1 = pGrid->GetStateMatrix();
-				gridStateSaveP2.block(0, 0, 1, 42) = gridStateSaveP1.block(0, 42, 1, 42);
-				gridStateSaveP2.block(0, 42, 1, 42) = gridStateSaveP1.block(0, 0, 1, 42);
-
-				pAI->NNQLearningFinal(gridStateSaveP1, WIN_CREDITS);
-				pAI->NNQLearningFinal(gridStateSaveP2, LOSS_CREDITS);
-
+				gridStateSave = pGrid->GetStateMatrix();
+				pAI->NNQLearningFinal(gridStateSave, WIN_CREDITS);
 				gameLoop = false;
 				break;
+
 			case Grid::WinState::p2:
-				gridStateSaveP1 = pGrid->GetStateMatrix();
-				gridStateSaveP2.block(0, 0, 1, 42) = gridStateSaveP1.block(0, 42, 1, 42);
-				gridStateSaveP2.block(0, 42, 1, 42) = gridStateSaveP1.block(0, 0, 1, 42);
-
-				pAI->NNQLearningFinal(gridStateSaveP1, LOSS_CREDITS);
-				pAI->NNQLearningFinal(gridStateSaveP2, WIN_CREDITS);
-
+				gridStateSave = pGrid->GetStateMatrix();
+				pAI->NNQLearningFinal(gridStateSave, LOSS_CREDITS);
 				gameLoop = false;
 				break;
+
 			case Grid::WinState::draw:
-				gridStateSaveP1 = pGrid->GetStateMatrix();
-				gridStateSaveP2.block(0, 0, 1, 42) = gridStateSaveP1.block(0, 42, 1, 42);
-				gridStateSaveP2.block(0, 42, 1, 42) = gridStateSaveP1.block(0, 0, 1, 42);
-
-				pAI->NNQLearningFinal(gridStateSaveP1, DRAW_CREDITS);
-				pAI->NNQLearningFinal(gridStateSaveP2, DRAW_CREDITS);
-
+				gridStateSave = pGrid->GetStateMatrix();
+				pAI->NNQLearningFinal(gridStateSave, DRAW_CREDITS);
 				gameLoop = false;
 				break;
 
@@ -71,33 +58,20 @@ void Train(Grid* pGrid, AI* pAI, uint32_t rounds)
 			switch (pGrid->CheckWinCondition())
 			{
 			case Grid::WinState::p1:
-				gridStateSaveP1 = pGrid->GetStateMatrix();
-				gridStateSaveP2.block(0, 0, 1, 42) = gridStateSaveP1.block(0, 42, 1, 42);
-				gridStateSaveP2.block(0, 42, 1, 42) = gridStateSaveP1.block(0, 0, 1, 42);
-
-				pAI->NNQLearningFinal(gridStateSaveP1, WIN_CREDITS);
-				pAI->NNQLearningFinal(gridStateSaveP2, LOSS_CREDITS);
-
+				gridStateSave = pGrid->GetStateMatrix();
+				pAI->NNQLearningFinal(gridStateSave, WIN_CREDITS);
 				gameLoop = false;
 				break;
+
 			case Grid::WinState::p2:
-				gridStateSaveP1 = pGrid->GetStateMatrix();
-				gridStateSaveP2.block(0, 0, 1, 42) = gridStateSaveP1.block(0, 42, 1, 42);
-				gridStateSaveP2.block(0, 42, 1, 42) = gridStateSaveP1.block(0, 0, 1, 42);
-
-				pAI->NNQLearningFinal(gridStateSaveP1, LOSS_CREDITS);
-				pAI->NNQLearningFinal(gridStateSaveP2, WIN_CREDITS);
-
+				gridStateSave = pGrid->GetStateMatrix();
+				pAI->NNQLearningFinal(gridStateSave, LOSS_CREDITS);
 				gameLoop = false;
 				break;
+
 			case Grid::WinState::draw:
-				gridStateSaveP1 = pGrid->GetStateMatrix();
-				gridStateSaveP2.block(0, 0, 1, 42) = gridStateSaveP1.block(0, 42, 1, 42);
-				gridStateSaveP2.block(0, 42, 1, 42) = gridStateSaveP1.block(0, 0, 1, 42);
-
-				pAI->NNQLearningFinal(gridStateSaveP1, DRAW_CREDITS);
-				pAI->NNQLearningFinal(gridStateSaveP2, DRAW_CREDITS);
-
+				gridStateSave = pGrid->GetStateMatrix();
+				pAI->NNQLearningFinal(gridStateSave, DRAW_CREDITS);
 				gameLoop = false;
 				break;
 

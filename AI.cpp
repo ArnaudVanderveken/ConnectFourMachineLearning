@@ -83,30 +83,23 @@ int AI::PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode)
 	probabilities.reserve(7);
 	Matrix<float, 1, 84> gridStateSavePre{ pGrid->GetStateMatrix() }; //gridState always puts P1 in the first half and P2 in the second half of the matrix
 	Matrix<float, 1, 84> gridStateSavePost{ pGrid->GetStateMatrix() };
-	Matrix<float, 1, 84> playState;
-
-	//Swap first and second halves of the gridState matrix if playing as P2
-	if (asPlayer1)
-		playState = gridStateSavePre;
-	else
-	{
-		playState.block(0, 0, 1, 42) = gridStateSavePre.block(0, 42, 1, 42);
-		playState.block(0, 42, 1, 42) = gridStateSavePre.block(0, 0, 1, 42);
-	}
 
 	for (int i{}; i < 7; ++i)
 	{
 		int row{ pGrid->GetAvailableRowInColumn(i) };
 		if (row == -1)
-			probabilities.push_back(-1.0f);
+			probabilities.push_back(asPlayer1 ? -FLT_MAX : FLT_MAX);
 		else
 		{
-			playState(0, row * 7 + i) = 1.0f;
-			probabilities.push_back(NNForwardPass(playState));
-			playState(0, row * 7 + i) = 0.0f;
+			gridStateSavePost(0, row * 7 + i + (asPlayer1 ? 0 : 42)) = 1.0f;
+			probabilities.push_back(NNForwardPass(gridStateSavePost));
+			gridStateSavePost(0, row * 7 + i + (asPlayer1 ? 0 : 42)) = 0.0f;
 		}
 	}
-	bestMove = std::max_element(probabilities.begin(), probabilities.end()) - probabilities.begin();
+	if (asPlayer1)
+		bestMove = std::max_element(probabilities.begin(), probabilities.end()) - probabilities.begin();
+	else
+		bestMove = std::min_element(probabilities.begin(), probabilities.end()) - probabilities.begin();
 	playedMove = bestMove; //Default
 
 	// E-greedy & learning only in trainingmode
@@ -125,17 +118,15 @@ int AI::PlayMove(Grid* pGrid, bool asPlayer1, bool trainingMode)
 		}
 		// else playedMove = bestMove, as default if no training
 
-		int tmp;
 		switch (m_AILearning)
 		{
 		case AILearning::QLearning:
-			tmp = pGrid->GetAvailableRowInColumn(bestMove);
-			gridStateSavePost(0, tmp * Grid::s_NrColumns + bestMove) = 1.0f;
+			gridStateSavePost(0, pGrid->GetAvailableRowInColumn(bestMove) * Grid::s_NrColumns + bestMove + (asPlayer1 ? 0 : 42)) = 1.0f;
 			NNQLearning(gridStateSavePre, gridStateSavePost);
 			break;
 
 		case AILearning::TDLambda:
-			gridStateSavePost(0, pGrid->GetAvailableRowInColumn(playedMove) * Grid::s_NrColumns + playedMove) = 1.0f;
+			gridStateSavePost(0, pGrid->GetAvailableRowInColumn(playedMove) * Grid::s_NrColumns + playedMove + (asPlayer1 ? 0 : 42)) = 1.0f;
 			NNTDLambda(gridStateSavePre, gridStateSavePost);
 			break;
 		}
@@ -172,33 +163,28 @@ float AI::NNForwardPass(const Matrix<float, 1, 84>& input) const
 
 void AI::NNQLearning(const Matrix<float, 1, 84>& oldState, const Matrix<float, 1, 84>& bestState)
 {
-	Matrix<float, 1, s_InnerLayerNeuronCount> intermediate{ bestState * m_Wint };
-	Matrix<float, 1, s_InnerLayerNeuronCount> bestStatePInt = Sigmoid(intermediate);
-	float bestStatePOut{ NNForwardPass(bestState) };
-	float delta{ NNForwardPass(oldState) - bestStatePOut };
-	float gradOut{ bestStatePOut * (1 - bestStatePOut) };
-
-	Matrix<float, 1, s_InnerLayerNeuronCount> gradInt;
-	for (int i{}; i < s_InnerLayerNeuronCount; ++i)
-	{
-		gradInt(0, i) = bestStatePInt(0, i) * (1 - bestStatePInt(0, i));
-	}
+	Matrix<float, 1, s_InnerLayerNeuronCount> intermediate{ oldState * m_Wint };
+	Matrix<float, 1, s_InnerLayerNeuronCount> oldStatePInt = Sigmoid(intermediate);
+	float oldStatePOut{ NNForwardPass(oldState) };
+	float delta{ oldStatePOut - NNForwardPass(bestState) };
+	float gradOut{ oldStatePOut * (1 - oldStatePOut) };
 
 	for (int i{}; i < s_InnerLayerNeuronCount; ++i)
 	{
-		float deltaInt = gradOut * m_Wout(i, 0) * gradInt(0, i);
+		float gradInt = oldStatePInt(0, i) * (1 - oldStatePInt(0, i));
+		float deltaInt = gradOut * m_Wout(i, 0) * gradInt;
 		for (int j{}; j < 84; ++j)
 		{
 			m_Wint(j, i) -= m_LearningRate * delta * deltaInt * oldState(0, j);
 		}
-		m_Wout(i, 0) -= m_LearningRate * delta * gradOut * bestStatePInt(0, i);
+		m_Wout(i, 0) -= m_LearningRate * delta * gradOut * oldStatePInt(0, i);
 	}
 }
 
 void AI::NNQLearningFinal(const Eigen::Matrix<float, 1, 84>& oldState, float result)
 {
 	Matrix<float, 1, s_InnerLayerNeuronCount> intermediate{ oldState * m_Wint };
-	Matrix<float, 1, s_InnerLayerNeuronCount> bestStatePInt = Sigmoid(intermediate);
+	Matrix<float, 1, s_InnerLayerNeuronCount> oldStatePInt = Sigmoid(intermediate);
 
 	float delta{ NNForwardPass(oldState) - result };
 
@@ -208,7 +194,7 @@ void AI::NNQLearningFinal(const Eigen::Matrix<float, 1, 84>& oldState, float res
 		{
 			m_Wint(j, i) -= m_LearningRate * delta * result * oldState(0, j);
 		}
-		m_Wout(i, 0) -= m_LearningRate * delta * result * bestStatePInt(0, i);
+		m_Wout(i, 0) -= m_LearningRate * delta * result * oldStatePInt(0, i);
 	}
 }
 
